@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "丝滑拖动",
+  "usingComponents": {
+    "image-drag": "/components/image-drag/image-drag"
+  }
+}

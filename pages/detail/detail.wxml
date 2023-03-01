@@ -1,0 +1,1 @@
+<image-drag chooseImgList="{{initImages}}" bind:setFilePaths="setFilePaths"></image-drag>

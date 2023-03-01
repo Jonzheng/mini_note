@@ -1,0 +1,8 @@
+.box-swiper{
+  width: 690rpx;
+  height: 690rpx;
+}
+.box-swiper .cover{
+  width: 100%;
+  height: 100%;
+}

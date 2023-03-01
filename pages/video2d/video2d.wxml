@@ -1,0 +1,11 @@
+<view class="box">
+  <view class="title">Canvas 2d 动画</view>
+  <canvas type="2d" id="canvas2d" style="height:{{cvHeight}}px;width:{{cvWidth}}px;" catchtap="setPoint"></canvas>
+  <canvas type="2d" id="canvas2d2" style="border: 1px solid #CCC; width: 300px; height: {{h}}px;"></canvas>
+  <!-- <image class="demo" src="{{tempSrc || '../../images/mine-on.png'}}" mode="widthFix"></image> -->
+  <video id="video" autoplay="{{true}}" controls="{{false}}" loop="{{false}}" style="width: 300px; height: 200px;" src="{{src}}" bindloadedmetadata="loadedmetadata"></video>
+  <view style="display: inline-block; width: 300px; height: 200px;">
+    <canvas id="cvs1" type="2d" style="border: 1px solid #CCC; width: 300px; height: {{h}}px;"></canvas>
+    <canvas id="cvs2" type="2d" style="border: 1px solid #CCC; width: 300px; height: {{h}}px;"></canvas>
+  </view>
+</view>

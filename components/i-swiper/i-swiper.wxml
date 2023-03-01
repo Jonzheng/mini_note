@@ -1,0 +1,9 @@
+<swiper class="box-swiper" current="{{1}}" circular="{{circular}}"
+  bindchange="_change" bindtransition="_transition" bindanimationfinish="_animationfinish"
+  style="width:{{width}};height:{{height}};">
+  <block wx:for="{{srcList}}" wx:key="id">
+    <swiper-item class="item" bindtap="clickItem" bindlongpress="clickItem" data-src="{{item}}" >
+      <image class="cover" src="{{ item }}" mode="aspectFit"></image>
+    </swiper-item>
+  </block>
+</swiper>

@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "自定开关",
+  "usingComponents": {
+    "i-switch": "/components/i-switch/i-switch"
+  }
+}

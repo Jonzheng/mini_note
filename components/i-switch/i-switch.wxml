@@ -1,0 +1,3 @@
+<view class="yabi-box ani" style="width: {{width}}rpx;height: {{height}}rpx;border-radius: {{borderRadius}}rpx;background: {{active? background: '#FFFFFF'}};border: 1rpx solid {{background}};position: relative;" catchtap="toggle">
+    <view class="ani" style="width: {{height - 15}}rpx;height: {{height - 15}}rpx;border-radius: 50%;background: #FFFFFF;box-shadow: 0 0 3px #888888;position: absolute;right: 0;transform: translateX({{ active? -8 : -(width + 15 - height) + 8 }}rpx);"></view>
+</view>

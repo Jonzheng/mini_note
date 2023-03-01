@@ -1,0 +1,3 @@
+<view class="box">
+  <i-swiper queue="{{queue}}" bind:nextPage="nextPage" bind:setCurrent="setCurrent" bind:clickItem="clickItem" width="710rpx"></i-swiper>
+</view>

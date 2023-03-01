@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "无限轮播",
+  "usingComponents": {
+    "i-swiper": "/components/i-swiper/i-swiper"
+  }
+}

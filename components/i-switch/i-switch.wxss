@@ -1,0 +1,10 @@
+.yabi-box{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ani{
+  transition: all 0.3s ease-out;
+  -webkit-transition:all 0.3s ease-out;
+}

@@ -1,0 +1,7 @@
+<navigator class="nav" url="/pages/detail/detail">丝滑拖动</navigator>
+<navigator class="nav" url="/pages/swiper/swiper">无限轮播</navigator>
+<navigator class="nav" url="/pages/switch/switch">自定开关</navigator>
+<navigator class="nav" url="/pages/video2d/video2d">画布2D</navigator>
+<navigator class="nav" url="/pages/code/code">动态的码</navigator>
+<navigator class="nav" url="/pages/crush/crush">三消</navigator>
+<view class="nav" bindtap="chooseFile">选择文件</view>

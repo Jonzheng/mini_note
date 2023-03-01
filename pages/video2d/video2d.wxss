@@ -1,0 +1,30 @@
+.box{
+    width: 750rpx;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .title{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 60rpx;
+    width: 750rpx;
+    color: #808080;
+    font-size: 34rpx;
+    font-weight: bold;
+  }
+
+  #canvas2d2{
+    margin-top: 12rpx;
+  }
+  #canvas2d23{
+    position: fixed;
+    left: -999px;top:-999px;
+  }
+  .demo{
+    width: 740rpx;
+    height: 740rpx;
+    margin-top: 12rpx;
+  }

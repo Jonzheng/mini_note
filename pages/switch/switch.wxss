@@ -1,0 +1,15 @@
+.box{
+  width: 750rpx;
+}
+.box .line{
+  padding: 0 20rpx;
+  margin-top: 30rpx;
+  display: flex;
+  width: 710rpx;
+  height: 80rpx;
+}
+.box .line text{
+  margin-right: 30rpx;
+  font-size: 22px;
+  font-weight: bold;
+}

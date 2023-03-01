@@ -1,0 +1,20 @@
+<view class="box">
+  
+  <view class="box-game">
+    <block wx:for="{{items}}" wx:key="this">
+      <view class="border-item item-transition {{item.on ? 'sd-on' : ''}} {{index == curIdx ? 'bor-on' : ''}}"
+        style="transform: translate({{item.x}}rpx, {{item.y}}rpx);"
+        bindtap="clickItem" data-idx="{{item.ori}}">
+        <view class="sd-item {{index == curIdx ? 'cur-on' : ''}}">
+          <view class="out-item">
+            <text>{{item.ori}}</text>
+            <image wx:if="{{item.on}}" class="img bg-on" src="{{item.path}}" mode="aspectFill"/>
+            <!-- <image wx:if="{{item.on}}" class="img bg-on {{index == curIdx ? 'img-on' : 'img-off'}}" src="{{item.path}}" mode="aspectFill"/> -->
+          </view>
+        </view>
+      </view>
+    </block>
+  </view> 
+
+
+</view>

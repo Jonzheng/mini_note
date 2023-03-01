@@ -1,0 +1,32 @@
+
+<view class="item-wrap" style="height: {{boxHeight}}rpx; transition: height .3s ease-out;">
+  <block wx:for="{{list}}" wx:key="index">
+    <view wx:if="{{item.key != -1 && item.key < maxLength}}"
+      style="transform: translate({{index === cur ? tranX : item.tranX}}px, {{index === cur ? tranY: item.tranY}}px);" class="item-out {{cur == index? 'cur':''}} {{curZ == index? 'zIndex':''}} {{itemTransition ? 'item-transition':''}}">
+      <view class="item"
+        data-key="{{item.key}}"
+        data-index="{{index}}"
+        data-fixed="{{item.fixed}}"
+        bind:longpress="longPress"
+        catch:touchmove="{{!touch?'':'touchMove'}}"
+        bindtap="{{item.fixed ? 'addImage' : ''}}"
+        catch:touchend="touchEnd">
+        <!-- <image wx:if="{{!item.fixed}}" class="item-icon-del" src="/images/item-del.png" mode="aspectFill"
+          catchtap="deleteItem" data-key="{{item.key}}" data-index="{{index}}"></image> -->
+        <image class="item-image {{item.fixed ? 'btn-add' : ''}}" src="{{item.src}}" mode="aspectFill"></image>
+        <view class="upload-status {{(chooseImgList[index].uploadStatus == 3||chooseImgList[index].uploadStatus == 4)?'fail':''}}"
+          wx:if="{{chooseImgList[index].uploadStatus && chooseImgList[index].uploadStatus != -2}}">
+          {{chooseImgList[index].uploadStatus == 0 ? '等待...' : (chooseImgList[index].uploadStatus == 1 ? (chooseImgList[index].progress||0) + '%' : (chooseImgList[index].uploadStatus == -1 ? '重试' : chooseImgList[index].uploadStatus == 3  ? '含敏感信息' : chooseImgList[index].uploadStatus == 4?'失败':  '已上传'))}}
+        </view>
+      </view>
+    </view>
+  </block>
+  
+<view class="box-to-delete {{itemHover ? 'an-in':'an-out'}} {{itemReach ? 'item-reach' : ''}}">
+  <image class="icon-delete" src="/images/icon-delete.png"></image>
+  <view hidden="{{itemReach}}" class="txt-delete">拖到此处删除</view>
+  <view hidden="{{!itemReach}}" class="txt-delete">松手即可删除</view>
+  <view wx:if="{{isIpx}}" class="temp-ipx"></view>
+</view>
+
+</view>
