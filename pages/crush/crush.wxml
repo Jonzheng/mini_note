@@ -2,19 +2,21 @@
   
   <view class="box-game">
     <block wx:for="{{items}}" wx:key="this">
-      <view class="border-item item-transition {{item.on ? 'sd-on' : ''}} {{index == curIdx ? 'bor-on' : ''}}"
+      <view class="border-item {{item.noAni ? '' : 'item-transition'}} {{item.on ? 'sd-on' : ''}} {{index == curIdx ? 'bor-on' : ''}}"
         style="transform: translate({{item.x}}rpx, {{item.y}}rpx);"
-        bindtap="clickItem" data-idx="{{item.ori}}">
+        bindtap="clickItem" data-pos="{{item.pos}}">
         <view class="sd-item {{index == curIdx ? 'cur-on' : ''}}">
           <view class="out-item">
-            <text>{{item.ori}}</text>
+            <!-- <text>{{index}}</text> -->
             <image wx:if="{{item.on}}" class="img bg-on" src="{{item.path}}" mode="aspectFill"/>
             <!-- <image wx:if="{{item.on}}" class="img bg-on {{index == curIdx ? 'img-on' : 'img-off'}}" src="{{item.path}}" mode="aspectFill"/> -->
           </view>
         </view>
       </view>
+      <block wx:for="{{item.clips}}" wx:key="this" wx:for-item="it">
+        <image class="img-on" src="{{it.path}}" style="{{it.css}}" mode="aspectFill"/>
+      </block>
     </block>
   </view> 
-
 
 </view>

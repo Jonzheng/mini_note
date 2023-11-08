@@ -1,0 +1,9 @@
+<view class="box">
+  <image class="i-demo" src="../../images/52.png" mode="aspectFit" bindtap="setA"/>
+  <view class="i-clip1">
+      <view wx:for="{{clip1}}" wx:key="this" class="img" style="clip-path: {{item}};"/>
+  </view>
+  <view class="i-clip2">
+    <view wx:for="{{clip2}}" wx:key="this" class="img" style="clip-path: {{item}};"/>
+  </view>
+</view>

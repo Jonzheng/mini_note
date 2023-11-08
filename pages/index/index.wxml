@@ -4,4 +4,7 @@
 <navigator class="nav" url="/pages/video2d/video2d">画布2D</navigator>
 <navigator class="nav" url="/pages/code/code">动态的码</navigator>
 <navigator class="nav" url="/pages/crush/crush">三消</navigator>
-<view class="nav" bindtap="chooseFile">选择文件</view>
+<navigator class="nav" url="/pages/clip/clip">clip</navigator>
+<view class="nav" bindtap="chooseFile">选择聊天文件</view>
+<view class="nav" bindtap="selectImage">选择图片</view>
+<view class="nav" bindtap="selectMedia">选择media</view>

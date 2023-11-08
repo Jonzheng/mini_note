@@ -2,9 +2,6 @@ const itemHeight = 230;
 const columns = 3;
 const iconAdd = '/images/bicon-add.png';
 Component({
-  /**
-   * 组件的属性列表
-   */
   properties: {
     uploading: {
       type: Boolean,
@@ -14,7 +11,7 @@ Component({
       type: Number,
       value: 9,
     },
-    chooseImgList: {
+    chooseImgList: { // 可以给初始值
       type: Array,
       value: [],
       observer(newList) {
@@ -34,23 +31,13 @@ Component({
     },
   },
 
-  /**
-   * 组件的初始数据
-   */
   data: {
     list: [],
     boxHeight: 230,
-    bottomY: 50,
-    showAs: false
+    bottomY: 50
   },
 
-  /**
-   * 组件的方法列表
-   */
   methods: {
-    /**
-     * 长按触发移动排序
-     */
     longPress(e) {
       this.startX = e.changedTouches[0].pageX;
       this.startY = e.changedTouches[0].pageY;
@@ -62,13 +49,11 @@ Component({
       });
       if (columns === 1) { // 单列时候X轴初始不做位移
         this.tranX = 0;
-      } else {  // 多列的时候计算X轴初始位移, 使 item 水平中心移动到点击处
+      } else {  // 多列的时候计算X轴初始位移
         this.tranX = this.startX - (this.item.width / 2) - this.itemWrap.left;
       }
-
-      // 计算Y轴初始位移, 使 item 垂直中心移动到点击处
+      // 计算Y轴初始位移
       this.tranY = this.startY - (this.item.height / 2) - this.itemWrap.top;
-      console.log(this.startY, this.tranY, this.itemWrap.top);
       this.setData({
         itemHover: true,
         cur: index,
@@ -76,7 +61,6 @@ Component({
         tranX: this.tranX,
         tranY: this.tranY,
       });
-
       wx.vibrateShort();
     },
 
@@ -84,21 +68,16 @@ Component({
       if (!this.data.touch) return;
       const tranX = e.touches[0].pageX - this.startX + this.tranX;
       const tranY = e.touches[0].pageY - this.startY + this.tranY;
-
       // 拖到删除区域
       const ipxFix = this.data.isIpx ? 50 : 0;
       const itemReach = (this.windowHeight - e.touches[0].clientY + ipxFix < 130);
-
       this.setData({ tranX, tranY, itemReach });
-
       const originKey = e.currentTarget.dataset.key;
       const endKey = this.calculateMoving(tranX, tranY);
       // 遇到固定项和超出范围则返回
       if (this.isFixed(endKey)) return;
-
       // 防止拖拽过程中发生乱序问题
       if (originKey == endKey || this.originKey == originKey) return;
-
       this.originKey = originKey;
       this.insert(originKey, endKey);
     },
@@ -110,23 +89,17 @@ Component({
       const rows = Math.ceil(this._itemCount / columns) - 1;
       let i = Math.round(tranX / this.item.width);
       let j = Math.round(tranY / this.item.height);
-
       i = i > (columns - 1) ? (columns - 1) : i;
       i = i < 0 ? 0 : i;
-
       j = j < 0 ? 0 : j;
       j = j > rows ? rows : j;
-
       let endKey = i + (columns * j);
-
       endKey = endKey >= this._itemCount ? this._itemCount - 1 : endKey;
-
       return endKey;
     },
 
     /**
      * 根据起始key和目标key去重新计算每一项的新的key
-     *
      */
     insert(origin, end) {
       let list;
@@ -168,13 +141,10 @@ Component({
       this.setData({
         list
       });
-      console.log('update:', list);
       if (!vibrate) return;
-
       this.setData({
         itemTransition: true
       });
-
       wx.vibrateShort();
       // let listData = [];
       // list.forEach((item) => {
@@ -185,7 +155,6 @@ Component({
 
     touchEnd() {
       if (!this.data.touch) return;
-      console.log('删除此图：', this.data.itemReach);
       if (this.data.itemReach) {
         this.deleteItem(this.data.cur);
       }
@@ -215,7 +184,6 @@ Component({
      */
     clearData() {
       this.originKey = -1;
-
       this.setData({
         itemHover: false,
         itemReach: false,
@@ -256,7 +224,6 @@ Component({
           tranX: 0,
           tranY: 0,
           src: item,
-          uploadStatus: item.uploadStatus ? item.uploadStatus : -2,
         };
         return data;
       });
@@ -335,7 +302,7 @@ Component({
         if (item.fixed || item.key == -1) {
 
         } else {
-          tempFilePaths.push({ path: item.src, uploadStatus: item.uploadStatus });
+          tempFilePaths.push({ path: item.src });
         }
       });
       this._leftCount = this.data.maxLength - tempFilePaths.length;

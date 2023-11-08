@@ -1,5 +1,7 @@
 // index.js
 // 获取应用实例
+var myexif = require('../../utils/myexif.js');
+
 const app = getApp()
 
 Page({
@@ -48,6 +50,7 @@ Page({
   },
   chooseFile() {
     console.log('choose file')
+    
     wx.chooseMessageFile({
       count: 1,
       success: res => {
@@ -55,6 +58,9 @@ Page({
         const tempFilePaths = res.tempFiles
         const [file] = tempFilePaths
         console.log('filt', file.path)
+        var array = wx.getFileSystemManager().readFileSync(file.path);
+        var r = myexif.handleBinaryFile(array);
+        console.log(r);
         // const fi = this._fs.saveFileSync(
         //   file.path,
         //   `${wx.env.USER_DATA_PATH}/hello.txt`
@@ -70,6 +76,29 @@ Page({
             console.log('bin res', res.data);
           }
         })
+      }
+    })
+  },
+  selectImage() {
+    wx.chooseImage({//选择图片
+        sizeType: ['compressed'],//图片不能经过压缩处理
+        success(res) {
+          var array = wx.getFileSystemManager().readFileSync(res.tempFilePaths[0] );;
+          var r =myexif.handleBinaryFile(array);
+          console.log(r);
+        }
+    });
+  },
+  selectMedia() {
+    wx.chooseMedia({
+      count: 9,
+      mediaType: ['image','video'],
+      sourceType: ['album', 'camera'],
+      maxDuration: 30,
+      camera: 'back',
+      success(res) {
+        console.log(res.tempFiles.tempFilePath)
+        console.log(res.tempFiles.size)
       }
     })
   }

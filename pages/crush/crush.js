@@ -2,16 +2,19 @@ const Size = 70
 const MaxX = 9
 const MaxY = 9
 const Paths = [
-  '13',
+  // '13',
+  // '370',
+  // '384',
+  // '721',
   // '43',
   // '220',
   // '233',
-  '370',
-  '384',
   // '661',
   // '671',
-  '721',
   // '764',
+  '77',
+  '78',
+  '79'
 ]
 
 Array.prototype.shuffle = function () {
@@ -47,11 +50,15 @@ Page({
   },
 
   onHide() {
-
+    if (this._stc) clearTimeout(this._stc);
+    if (this._sta) clearTimeout(this._sta);
+    if (this._stb) clearTimeout(this._stb);
   },
 
   onUnload() {
-
+    if (this._stc) clearTimeout(this._stc);
+    if (this._sta) clearTimeout(this._sta);
+    if (this._stb) clearTimeout(this._stb);
   },
 
   onPullDownRefresh() {
@@ -86,27 +93,27 @@ Page({
       const iy = ~~(idx / MaxX)
       items.push({
         pos: idx,
-        ori: idx,
         on: true,
         value: ~~(it),
-        path: `../../images/${it}.png`,
+        path: `../../images/${it}.jpg`,
         x: ix * Size + (ix + 1) * 6,
         y: iy * Size + (iy + 1) * 6
       });
     });
-    console.log(items)
     this.setData({
       items
     });
   },
 
   clickItem(e) {
-    const { idx } = e.currentTarget.dataset;
+    if (this._lock) return;
+    const { pos } = e.currentTarget.dataset;
+    const idx = this._itemsIdx[pos]
     const { items } = this.data
-    const isNear = this.nearBy(idx, this._preIdx, items);
-    console.log('---', isNear, this._preIdx, idx);
+    const isNear = this.nearBy(pos, this._prePos);
     if (!isNear) {
       this._preIdx = idx
+      this._prePos = pos
       return this.setData({
         curIdx: idx
       });
@@ -114,11 +121,7 @@ Page({
     if (isNear) {
       // this.makeMatrix(items);
       const preItem = Object.assign({}, items[this._preIdx]);
-      const item = items[idx]
-
-      const tmp = this._itemsIdx[preItem.pos];
-      this._itemsIdx[preItem.pos] = this._itemsIdx[item.pos];
-      this._itemsIdx[item.pos] = tmp;
+      const item = Object.assign({}, items[idx])
 
       items[this._preIdx].x = item.x
       items[this._preIdx].y = item.y
@@ -126,17 +129,35 @@ Page({
       items[idx].x = preItem.x
       items[idx].y = preItem.y
       items[idx].pos = preItem.pos
-      this._preIdx = undefined
-      console.log('this._itemsIdx', this._itemsIdx)
+
+      const tmp = this._itemsIdx[pos];
+      this._itemsIdx[pos] = this._itemsIdx[this._prePos];
+      this._itemsIdx[this._prePos] = tmp;
       this.setData({
         items,
         curIdx: -1
       }, ()=>{
-        // this.checkCrush(items);
-        // const _items = Object.assign([], items);
-        // _items.sort((a, b) => a.pos - b.pos);
-        const idxs = this.getHorizontalIdx()//.concat(this.getVerticalArr(items));
-        this.updateItems(idxs);
+        const idxs = this.getHorizontalIdx().concat(this.getVerticalIdx());
+        if (idxs.length > 0) {
+          this._preIdx = undefined
+          this._prePos = undefined
+          this.updateItems(idxs);
+        } else {
+          this.stRe = setTimeout(()=>{
+            items[this._preIdx] = preItem
+            items[idx] = item
+      
+            const rePos = this._itemsIdx[pos]
+            this._itemsIdx[pos] = tmp;
+            this._itemsIdx[this._prePos] = rePos;
+            this._lock = ''
+            this._preIdx = undefined
+            this._prePos = undefined
+            return this.setData({
+              items
+            });
+          }, 300)
+        }
       });
     }
   },
@@ -145,47 +166,106 @@ Page({
     this._matrix = Array(MaxY).fill().map(() => Array(MaxX).fill(0));
     this._idxArr = []
     items.forEach((it, idx) => {
-      console.log(~~(idx / MaxX), idx % MaxX)
       this._matrix[~~(idx / MaxX)][idx % MaxX] = idx;
       this._idxArr.push(idx);
     });
-    console.log(...this._matrix)
   },
 
   updateItems(idxs){
+    if (idxs.length === 0 || this._stc) return;
+    this._lock = true
     this._stc = setTimeout(() => {
       this._stc = ''
       const {items: itemsOri} = this.data;
       for(let i of idxs) {
         const oi = this._itemsIdx[i]
-        this._itemsIdx[i] = ~~(Math.random() * 1000000);
+        if (oi > itemsOri.length) continue;
+        this._itemsIdx[i] = oi + 1000;
+        itemsOri[oi].clips = this.randomClip(itemsOri[oi])
         itemsOri[oi].on = false;
-        itemsOri[oi].y = -50;
+        itemsOri[oi].y = itemsOri[oi].y - 700;
+        itemsOri[oi].noAni = true;
       };
-      // for (let i of relIdx) {
-      //   let upIdx = i - MaxX;
-      //   while(upIdx > -1) {
-      //     this._itemsIdx[i+MaxX] = this._itemsIdx[upIdx];
-      //     this._itemsIdx[i+MaxX] = '';
-      //     let ori = this._itemsIdx[upIdx]
-      //     if (itemsOri[ori].on) {
-      //       itemsOri[ori].pos += MaxX
-      //       itemsOri[ori].y += (Size + 6)
-      //     }
-      //     upIdx -= MaxX
-      //   }
-      // }
 
+      // 剩余方块下落的逻辑
+      const size = this._itemsIdx.length
+      let i = size - 1
+      while (i > -1) {
+        let upIdx = i
+        while (this._itemsIdx[i] > size && upIdx > -1) {
+          upIdx -= MaxX
+          if (this._itemsIdx[upIdx] < size) {
+            let tmp = this._itemsIdx[upIdx]
+            this._itemsIdx[upIdx] = this._itemsIdx[i]
+            this._itemsIdx[i] = tmp
+          }
+        }
+        i--
+      }
+
+      this._itemsIdx.forEach((it, idx)=>{
+        const ix = ~~(idx % MaxX)
+        const iy = ~~(idx / MaxX)
+        if (it < size) {
+          if (itemsOri[it].pos !== idx) {
+            itemsOri[it].x = ix * Size + (ix + 1) * 6
+            itemsOri[it].y = iy * Size + (iy + 1) * 6
+            itemsOri[it].pos = idx
+          }
+        }
+      })
       this.setData({
         items: itemsOri
       })
-    }, 300)
+      this._stb = setTimeout(()=>{
+        this._stb = ''
+        this._itemsIdx.forEach((it, idx)=>{
+          const ix = ~~(idx % MaxX)
+          const iy = ~~(idx / MaxX)
+          if (it > size) {
+            const name = [].concat(Paths).shuffle().pop()
+            const dx = it - 1000
+            itemsOri[dx].noAni = false
+            itemsOri[dx].x = ix * Size + (ix + 1) * 6
+            itemsOri[dx].y = iy * Size + (iy + 1) * 6
+            itemsOri[dx].pos = idx
+            itemsOri[dx].on = true
+            itemsOri[dx].value = ~~name
+            itemsOri[dx].path = `../../images/${name}.jpg`
+            this._itemsIdx[idx] = dx
+          }
+        })
+        this.setData({
+          items: itemsOri
+        })
+        
+        if (this._sta) clearTimeout(this._sta);
+        this._sta = setTimeout(()=>{
+          this._sta = ''
+          this._lock = ''
+          const idxs = this.getHorizontalIdx().concat(this.getVerticalIdx());
+          if (idxs.length > 0) {
+            this.updateItems(idxs);
+          } else {
+            itemsOri.forEach(it=>{
+              delete it.clips
+            });
+            console.log(...itemsOri)
+            this.setData({
+              items: itemsOri
+            })
+          }
+        }, 300)
+
+      }, 200)
+
+    }, 200)
   },
 
   getHorizontalIdx(){
     const {items} = this.data;
     let idxs = []
-    let tmp = [];
+    let tmp = []
     let prePos = 0
     this._itemsIdx.forEach((it, idx) => {
       if (idx % MaxY === 0) {
@@ -209,131 +289,91 @@ Page({
         }
       }
     })
-    console.log('horizontalIdxs:', ...idxs);
     return idxs;
   },
 
-  getHorizontalArr(items){
-    let horizontalIdxs = []
-    let tmp = []
-    items.forEach((it, idx)=>{
-      it.idx = idx;
-      if (!tmp[0]) {
-        tmp.unshift(it)
-      } else if (idx % MaxX === 0) {
-        if (tmp.length > 2) {
-          // horizontalIdxs.push(tmp.map(it=>it.idx));
-          horizontalIdxs = horizontalIdxs.concat(tmp.map(it=>it.ori))
-          tmp = [it]
-        } else {
-          tmp = [it]
-        }
-      } else if (tmp[0].value === it.value) {
-        tmp.unshift(it)
-      } else if (tmp.length > 2) {
-        // horizontalIdxs.push(tmp.map(it=>it.idx));
-        horizontalIdxs = horizontalIdxs.concat(tmp.map(it=>it.ori))
-        tmp = [it]
-      } else {
-        tmp = [it]
-      }
-      console.log('idx', idx)
-      if (idx === items.length - 1) {
-        console.log('idx', idx, tmp)
-        if (tmp.length > 2) {
-          // horizontalIdxs.push(tmp.map(it=>it.idx));
-          horizontalIdxs = horizontalIdxs.concat(tmp.map(it=>it.ori))
-          tmp = []
-        }
-      }
-    });
-    console.log('horizontalIdxs:', ...horizontalIdxs);
-    return horizontalIdxs;
-  },
-
-  getVerticalArr(items) {
-    items = Object.assign([], items);
-    items.sort((a, b) => a.pos - b.pos);
-    let verticalIdxs = [];
+  getVerticalIdx() {
+    const {items} = this.data;
+    let idxs = [];
     for (let i=0; i < MaxX; i++) {
       let tmp = []
-      let vi = i;
+      let vi = i
+      let it = this._itemsIdx[i]
+      let prePos = 0
       while(vi < items.length) {
-        // console.log('vi', vi, items[vi].value)
-        if (!tmp[0]) {
-          tmp = [items[vi]]
-        } else if (tmp[0].value === items[vi].value) {
-          tmp.unshift(items[vi])
-        } else if (!items[vi]) {
-          if (tmp.length > 2) {
-            // verticalIdxs.push(tmp.map(it=>it.ori))
-            verticalIdxs = verticalIdxs.concat(tmp.map(it=>it.ori))
-          }
+        if (vi < MaxX) {
+          tmp = [vi]
+          prePos = it
+        } else if (items[it] !== undefined && items[prePos] !== undefined && items[it].value === items[prePos].value) {
+          tmp.push(vi)
         } else {
           if (tmp.length > 2) {
-            // verticalIdxs.push(tmp.map(it=>it.ori))
-            verticalIdxs = verticalIdxs.concat(tmp.map(it=>it.ori))
-            tmp = [items[vi]]
-          } else {
-            tmp = [items[vi]]
+            idxs = idxs.concat(tmp)
           }
-        }
-        if (vi + MaxX > items.length - 1 && tmp.length > 2) {
-          // verticalIdxs.push(tmp.map(it=>it.ori))
-          verticalIdxs = verticalIdxs.concat(tmp.map(it=>it.ori))
+          tmp = [vi]
+          prePos = it
         }
         vi += MaxX;
+        it = this._itemsIdx[vi]
+      }
+      if (vi > this._itemsIdx.length - 1) {
+        if (tmp.length > 2) {
+          idxs = idxs.concat(tmp)
+        }
       }
     }
-    console.log('verticalIdxs:', verticalIdxs)
-    return verticalIdxs;
+    return idxs;
   },
 
-  checkCrush(items) {
-    items = Object.assign([], items);
-    this._checkEnd = false;
-    // if (this._stc) return;
-    this._stc = setTimeout(() => {
-      this._stc = '';
-      this._checkEnd = true;
-      items.sort((a, b) => a.pos - b.pos);
-      console.log(items)
-      const {items: itemsOri} = this.data;
-      // verticalIdxs.forEach(it=>{
-      //   it.forEach(i=>{
-      //     itemsOri[i].on = false
-      //   })
-      // });
-      verticalIdxs.forEach(arr=>{
-        arr.forEach(i=>{
-          itemsOri[i].on = false
-          itemsOri[i].pos = -1
-          itemsOri[i].y = -50
-        });
-        // const size = arr.length;
-        // let bi = arr[size - 1]
-        // while(itemsOri[bi]) {
-        //   if (itemsOri[bi].on) {
-        //     itemsOri[bi].pos = bi + size * MaxX
-        //     itemsOri[bi].y = itemsOri[bi].y + (Size + 6) * size;
-        //   }
-        //   bi -= MaxX
-        // }
-      })
-      this.setData({ items: itemsOri });
-    }, 300)
+  checkCrush() {
+
   },
 
-  nearBy(idxA, idxB, items){
-    if (idxA === undefined || idxB === undefined) return false;
-    items = items || this.data.items;
-    let near = Math.abs(items[idxA].pos - items[idxB].pos) === 1;
-    if (!near) {
-      near = items[idxB].pos - items[idxA].pos === MaxX
-    }
-    if (!near) {
-      near = items[idxA].pos - items[idxB].pos === MaxX
-    }
-    return near;
+  nearBy(posA, posB){
+    if (posA === undefined || posB === undefined) return false;
+    return Math.abs(posA - posB) === 1 || Math.abs(posB - posA) === MaxX;
   },
+
+  randomClip(item){
+    return this.randomTri(0, 0, Size, item)
+  },
+
+  randomTri(a, b, s, item){
+    const {path, x, y} = item;
+    const d3 = s / 3
+    const pu1 = d3 + Math.random() * d3
+    const pu2 = d3 + Math.random() * d3
+    const pu3 = d3 + Math.random() * d3
+    const pu4 = d3 + Math.random() * d3
+    const p1 = `${a}rpx ${b}rpx`
+    const p2 = `${a+pu1}rpx ${b}rpx`
+    const p3 = `${a+s}rpx ${b}rpx`
+    const p4 = `${a}rpx ${b+s-pu2}rpx`
+    const p5 = `${a+s}rpx ${b+pu3}rpx`
+    const p6 = `${a}rpx ${b+s}rpx`
+    const p7 = `${a+s-pu4}rpx ${b+s}rpx`
+    const p8 = `${a+s}rpx ${b+s}rpx`
+    const pc = `${a+s/2}rpx ${b+s/2}rpx`
+    // return [
+    //     {path,x,y, cp: `polygon(${p1}, ${p2}, ${p4})`, ani: `bout-${~~(Math.random() * 2)} ${0.2+Math.random() * 0.6}s ease-in`},
+    //     {path,x,y, cp: `polygon(${p2}, ${p3}, ${p5})`, ani: `bout-${~~(Math.random() * 2)} ${0.2+Math.random() * 0.6}s ease-in`},
+    //     {path,x,y, cp: `polygon(${p4}, ${p6}, ${p7})`, ani: `bout-${~~(Math.random() * 2)} ${0.2+Math.random() * 0.6}s ease-in`},
+    //     {path,x,y, cp: `polygon(${p7}, ${p8}, ${p5})`, ani: `bout-${~~(Math.random() * 2)} ${0.2+Math.random() * 0.6}s ease-in`},
+    //     {path,x,y, cp: `polygon(${pc}, ${p2}, ${p4})`, ani: `bout-${~~(Math.random() * 2)} ${0.2+Math.random() * 0.6}s ease-in`},
+    //     {path,x,y, cp: `polygon(${pc}, ${p2}, ${p5})`, ani: `bout-${~~(Math.random() * 2)} ${0.2+Math.random() * 0.6}s ease-in`},
+    //     {path,x,y, cp: `polygon(${pc}, ${p5}, ${p7})`, ani: `bout-${~~(Math.random() * 2)} ${0.2+Math.random() * 0.6}s ease-in`},
+    //     {path,x,y, cp: `polygon(${pc}, ${p4}, ${p7})`, ani: `bout-${~~(Math.random() * 2)} ${0.2+Math.random() * 0.6}s ease-in`},
+    // ]
+    return [
+        {path, css: `clip-path:polygon(${p1}, ${p2}, ${p4});left:${x}rpx;top:${y}rpx;animation: bout-${~~(Math.random() * 2)} ${0.2+Math.random() * 0.3}s ease-in;animation-fill-mode: forwards;`},
+        {path, css: `clip-path:polygon(${p2}, ${p3}, ${p5});left:${x}rpx;top:${y}rpx;animation: bout-${~~(Math.random() * 2)} ${0.2+Math.random() * 0.3}s ease-in;animation-fill-mode: forwards;`},
+        {path, css: `clip-path:polygon(${p4}, ${p6}, ${p7});left:${x}rpx;top:${y}rpx;animation: bout-${~~(Math.random() * 2)} ${0.2+Math.random() * 0.3}s ease-in;animation-fill-mode: forwards;`},
+        {path, css: `clip-path:polygon(${p7}, ${p8}, ${p5});left:${x}rpx;top:${y}rpx;animation: bout-${~~(Math.random() * 2)} ${0.2+Math.random() * 0.3}s ease-in;animation-fill-mode: forwards;`},
+        {path, css: `clip-path:polygon(${pc}, ${p2}, ${p4});left:${x}rpx;top:${y}rpx;animation: bout-${~~(Math.random() * 2)} ${0.2+Math.random() * 0.3}s ease-in;animation-fill-mode: forwards;`},
+        {path, css: `clip-path:polygon(${pc}, ${p2}, ${p5});left:${x}rpx;top:${y}rpx;animation: bout-${~~(Math.random() * 2)} ${0.2+Math.random() * 0.3}s ease-in;animation-fill-mode: forwards;`},
+        {path, css: `clip-path:polygon(${pc}, ${p5}, ${p7});left:${x}rpx;top:${y}rpx;animation: bout-${~~(Math.random() * 2)} ${0.2+Math.random() * 0.3}s ease-in;animation-fill-mode: forwards;`},
+        {path, css: `clip-path:polygon(${pc}, ${p4}, ${p7});left:${x}rpx;top:${y}rpx;animation: bout-${~~(Math.random() * 2)} ${0.2+Math.random() * 0.3}s ease-in;animation-fill-mode: forwards;`},
+    ]
+  },
+
 })

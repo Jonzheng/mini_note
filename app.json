@@ -5,7 +5,8 @@
     "pages/switch/switch",
     "pages/video2d/video2d",
     "pages/swiper/swiper",
-    "pages/crush/crush"
+    "pages/crush/crush",
+    "pages/clip/clip"
   ],
   "window": {
     "backgroundTextStyle": "light",
